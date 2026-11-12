@@ -1,108 +1,185 @@
-# SRM Agentic AI Hackathon: Starter Template
+# HireFlow AI
 
-This is the starting point for every team. It already has the setup done, so you can spend your time on your problem statement.
+An AI-powered Job Matching and Career Assistance agent built for the **SRM Agent Hackathon (PS6: Job Matching Agent)**.
 
-**Stack:** Next.js (App Router) · React · TypeScript · Tailwind CSS · Supabase PostgreSQL · Google Gemini API (function calling) · Zod · Vercel
+HireFlow AI understands a candidate's profile, retrieves real job listings, scores compatibility with a deterministic matching engine, and lets candidates save jobs to a shortlist, all through a natural-language chat with a Gemini-powered agent.
 
-## What is already working
+---
 
-- A passcode login that protects your app and your Gemini quota
-- A Supabase connection (server side only)
-- A Gemini agent loop with function calling: Gemini picks a tool, Zod checks the arguments, your code runs it, and the result goes back to Gemini
-- 3 example tools on a `tasks` table: `listTasks` (reads), `createTask` (writes) and `completeTask` (writes)
-- A chat screen that shows every tool the agent used
-- An example REST API (`/api/tasks`) and a live data list
-- Seed data for all 6 problem statements in `seed/`
+## Features
 
-## Setup (about 30 minutes)
+- **AI Career Assistant**: chat with a Gemini agent that uses real tool calls (function calling), not canned answers.
+- **Job Matching Engine**: transparent, deterministic TypeScript scoring (no AI-invented scores).
+- **Explainable Results**: every match shows matching skills, missing skills and a score breakdown.
+- **Shortlists**: save jobs to Supabase and view them later.
+- **Dashboard and Job Discovery**: browse jobs and see live stats from the database.
+- **Passcode Authentication**: simple protected access.
 
-1. **Create your team repo.** Click **Use this template** on GitHub and name it `team-<number>-ps<number>`.
-2. **Install.** Run `git clone <your repo>`, `cd` into it, and run `npm install`. You need Node.js 20 or later.
-3. **Create the database.** Create a project on [supabase.com](https://supabase.com). In **SQL Editor**, run `seed/00_starter_example.sql`, then the seed file for your problem.
-4. **Get the keys.**
-   - Supabase **Project Settings**: copy the Project URL and the secret (service_role) key
-   - [Google AI Studio](https://aistudio.google.com): click **Get API key**
-5. **Create `.env.local`.** Copy `.env.example` to `.env.local` and fill in all the values.
-6. **Run it.** Run `npm run dev`, open http://localhost:3000, enter your passcode and try a sample prompt.
-7. **Deploy.** On [vercel.com](https://vercel.com), import the repo, add the same environment variables, and deploy.
+---
 
-To check your settings, open `/api/health`. It shows which variables are missing (never their values).
+## Tech Stack
 
-## Folder guide
+| Layer | Technology |
+|---|---|
+| Framework | Next.js (App Router), React, TypeScript |
+| Styling | Tailwind CSS |
+| AI | Google Gemini (function calling) |
+| Database | Supabase (PostgreSQL) |
+| Validation | Zod |
+| Deployment | Vercel |
+
+---
+
+## How the Agent Works
+
+All agent logic lives in `lib/agent/`:
+
+| File | Responsibility |
+|---|---|
+| `systemPrompt.ts` | Agent role, persona, context, tasks, constraints, tool rules |
+| `tools.ts` | All tool definitions (read and write) |
+| `defineTool.ts` | Tool registration with Zod validation |
+| `runAgent.ts` | Gemini execution and function-calling loop |
+
+### Tools
+
+| Tool | Type | Purpose |
+|---|---|---|
+| `getCandidateProfile` | Read | Fetch the candidate's profile |
+| `listAvailableJobs` | Read | Fetch jobs from Supabase |
+| `findJobMatches` | Read / Compute | Rank jobs with the matching engine |
+| `saveJobMatch` | Write | Save a job to the shortlist (duplicate-safe) |
+| `listShortlistedJobs` | Read | Retrieve saved jobs |
+| `updateApplicationStatus` | Write | Update status (only if the schema supports it) |
+
+### Matching Algorithm
+
+| Factor | Weight |
+|---|---|
+| Skills | 40% |
+| Experience | 25% |
+| Education | 15% |
+| Location | 10% |
+| Role preference | 10% |
+
+Gemini explains the calculated results; it never generates the scores.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18 or later
+- A Supabase project
+- A Google Gemini API key
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/learn2simple/srm-agent-hackathon-starter.git
+cd srm-agent-hackathon-starter
+npm install
+```
+
+### 2. Configure environment variables
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+Use the exact variable names listed in `.env.example` (Gemini API key, Supabase URL and keys, and the access passcode). **Never commit `.env.local`.**
+
+### 3. Set up the database
+
+In the Supabase **SQL Editor**, run:
+
+1. `seed/00_starter_example.sql`
+2. `seed/ps6_job_match.sql`
+
+### 4. Run the app
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) and log in with your passcode.
+
+Health check: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+
+---
+
+## Try It
+
+Ask the assistant:
+
+1. "Find jobs matching my profile."
+2. "Why is the first job a good match?"
+3. "What skills am I missing?"
+4. "Save the first job."
+5. "Show me my shortlisted jobs."
+
+---
+
+## Project Structure
 
 ```
 app/
-  page.tsx               Home page: agent chat + data list   <- change
-  login/page.tsx         Passcode page
-  api/agent/route.ts     POST /api/agent: runs the agent
-  api/tasks/route.ts     Example REST API                    <- copy for your tables
-  api/health/route.ts    Shows which settings are missing
-components/
-  AgentChat.tsx          Chat UI that shows tool calls       <- change the sample prompts
-  TaskList.tsx           Example data list                   <- replace with your data
+  page.tsx            Main app screen
+  login/page.tsx      Passcode login
+  api/
+    agent/route.ts    Gemini agent endpoint
+    tasks/route.ts    Tasks endpoint
+    health/route.ts   Health check
+components/           UI components (chat, lists, job cards)
 lib/
-  agent/tools.ts         THE AGENT TOOLS                     <- your main work
-  agent/systemPrompt.ts  Instructions for Gemini             <- rewrite for your problem
-  agent/runAgent.ts      The agent loop (max 5 rounds)
-  agent/defineTool.ts    Turns Zod schemas into Gemini tool declarations
-  supabase.ts            Server-side Supabase client
-  schemas.ts             Shared Zod schemas
-proxy.ts                 Passcode gate for every page and API
-seed/                    SQL seed data for each problem statement
+  agent/              Agent prompt, tools, execution loop
+  supabase.ts         Supabase client
+seed/                 SQL seed files
 ```
 
-## How to add a tool (the main hackathon work)
+(Adjust to match your final file layout.)
 
-Open `lib/agent/tools.ts` and copy this pattern:
+---
 
-```ts
-const createReturnRequest = defineTool({
-  name: "createReturnRequest",
-  description: "Use this when the customer wants to return a product from a delivered order.",
-  writes: true,
-  schema: z.object({
-    order_id: z.number().int().describe("The order number, for example 1007"),
-    product_id: z.string().describe("The product id, for example P101"),
-    reason: z.string().min(3).describe("Why the customer is returning it"),
-  }),
-  run: async ({ order_id, product_id, reason }) => {
-    // 1. Check your business rule (for example the return window)
-    // 2. Read or write Supabase
-    // 3. Return a small, clean object, or throw new Error("clear message")
-  },
-});
+## Deployment (Vercel)
 
-export const tools: AgentTool[] = [createReturnRequest /*, more tools */];
+1. Push the repo to GitHub (ensure `.env.local` is not committed).
+2. Import the repo in [Vercel](https://vercel.com).
+3. Add the same environment variables from `.env.local` in **Project Settings, Environment Variables**.
+4. Deploy, then test `/api/health` and the agent chat.
+
+Verify the production build locally first:
+
+```bash
+npm run build
 ```
 
-Good tools:
+---
 
-- Have a description that starts with "Use this when..."
-- Describe every field and its format, for example "YYYY-MM-DD"
-- Check business rules in code, not only in the prompt
-- Return small objects that Gemini can read easily
-- Throw clear errors, which the agent then explains to the user
+## Security Notes
 
-Then rewrite `lib/agent/systemPrompt.ts`. Name the business user, the logged-in user id (for example `C001`), your business rules and when to use each tool.
+- Supabase service credentials and the Gemini key are used **server-side only**.
+- All tool inputs are validated with Zod.
+- Shortlist writes verify the job exists and prevent duplicates.
+- No destructive database operations are performed.
 
-## Rules to remember
+---
 
-- Never commit `.env.local`. It is already in `.gitignore`.
-- Never use `SUPABASE_SECRET_KEY` in frontend code. Only files under `lib/` and `app/api/` may use it.
-- Do not change the core stack.
-- Before you push, run `npm run build`. If it fails on your laptop, it will fail on Vercel too.
+## Troubleshooting
 
-## Seed files
+| Problem | Fix |
+|---|---|
+| Port 3000 in use | `npm run dev -- -p 3001` |
+| No jobs or profile showing | Run the seed SQL files in Supabase |
+| Agent not responding | Check the Gemini API key and rate limits |
+| Env changes ignored | Restart the dev server |
 
-| File | Problem |
-| --- | --- |
-| `00_starter_example.sql` | Example `tasks` table (run first) |
-| `demo_eventease.sql` | Day 1 lab: EventEase campus events |
-| `ps1_ecommerce_support.sql` | PS1 E-commerce Customer Support Agent |
-| `ps2_inventory_restock.sql` | PS2 Inventory Restock Agent |
-| `ps3_clinic_appointments.sql` | PS3 Clinic Appointment Agent |
-| `ps4_it_helpdesk.sql` | PS4 IT Helpdesk Ticket Agent |
-| `ps5_expense_claims.sql` | PS5 Expense Claim Assistant |
-| `ps6_job_match.sql` | PS6 Job Match Agent |
+---
 
-All dates in the seed data are relative to today, so the data is always fresh. All names, companies and records are made up. You can run a seed file again at any time to reset your data.
+## Hackathon
+
+Built for the **SRM Agent Hackathon**, Problem Statement 6: Job Matching Agent.
+
