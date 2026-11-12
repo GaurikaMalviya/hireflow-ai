@@ -26,25 +26,35 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-lg font-semibold">Enter team passcode</h1>
-        <p className="mt-1 text-sm text-slate-500">This keeps your app and your Gemini quota safe.</p>
+    <main className="flex min-h-screen items-center justify-center p-4 bg-slate-50">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 shadow-xs">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold text-lg shadow-xs">
+            H
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-slate-900">HireFlow AI</h1>
+            <p className="text-xs text-slate-500">AI Job Matching Platform</p>
+          </div>
+        </div>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Enter your team passcode to access the campus placement dashboard and Gemini Career Assistant.
+        </p>
         <input
           type="password"
           value={passcode}
           onChange={(e) => setPasscode(e.target.value)}
-          className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
-          placeholder="Passcode"
+          className="mt-4 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder:text-slate-400"
+          placeholder="Team Passcode"
           autoFocus
         />
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2.5 text-xs text-red-600 font-medium">{error}</p>}
         <button
           type="submit"
           disabled={loading || !passcode}
-          className="mt-4 w-full rounded-lg bg-slate-900 px-3 py-2 text-white disabled:opacity-50"
+          className="mt-4 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-xs"
         >
-          {loading ? "Checking..." : "Enter"}
+          {loading ? "Verifying..." : "Enter Platform"}
         </button>
       </form>
     </main>

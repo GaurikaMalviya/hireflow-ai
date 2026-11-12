@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-// YOUR JOB: change the title and description for your app.
+// App Metadata for HireFlow AI
 export const metadata: Metadata = {
-  title: "Hackathon Starter",
-  description: "Next.js + Supabase + Gemini function calling starter",
+  title: "HireFlow AI - AI Job Matching Platform",
+  description: "Intelligent campus placement and job matching assistant powered by Gemini & Supabase",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -23,3 +23,17 @@ export const createTaskSchema = z.object({
   title: z.string().trim().min(1).max(200),
   due_date: isoDate.optional(),
 });
+
+/** PS6 Job Match & Shortlist schemas */
+export const shortlistCreateSchema = z.object({
+  profile_id: z.string().min(1).default("S001"),
+  job_id: z.number().int().positive(),
+  match_score: z.number().int().min(0).max(100).optional(),
+  reason: z.string().max(500).optional(),
+});
+
+export const shortlistDeleteSchema = z.object({
+  id: z.number().int().positive().optional(),
+  profile_id: z.string().min(1).optional(),
+  job_id: z.number().int().positive().optional(),
+});

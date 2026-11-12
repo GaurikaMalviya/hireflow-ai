@@ -10,7 +10,12 @@ let client: SupabaseClient | null = null;
  */
 export function getSupabase(): SupabaseClient {
   if (!client) {
-    client = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SECRET_KEY"), {
+    const rawUrl = requireEnv("SUPABASE_URL");
+    const normalizedUrl = rawUrl.replace(
+      /https:\/\/supabase\.com\/dashboard\/project\/([a-z0-9]+).*/i,
+      "https://$1.supabase.co"
+    );
+    client = createClient(normalizedUrl, requireEnv("SUPABASE_SECRET_KEY"), {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }
